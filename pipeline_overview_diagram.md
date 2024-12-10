@@ -2,7 +2,6 @@
 
 ## Pipeline Overview 
 
-
 ```mermaid
 architecture-beta
     service input_files(logos:json-ld)[User Manual Upload]
@@ -63,6 +62,9 @@ architecture-beta
     junctionSilverGoldBottomBottomRight:T -- B:mart{group}
 ```
 
+Ideally it should render like
+![alt text](_resources/pipeline_overview_diagram.md/image.png)
+
 Logos:
-https://icon-sets.iconify.design/logos/page-35.html?keyword=logos
-https://unpkg.com/browse/@iconify-json/logos@1.2.3/
+- https://icon-sets.iconify.design/logos/page-35.html?keyword=logos
+- https://unpkg.com/browse/@iconify-json/logos@1.2.3/

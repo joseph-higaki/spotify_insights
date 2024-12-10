@@ -23,6 +23,11 @@ Spotify stores streaming data, even though yearly Warped is a nice visualizition
 | **Visualization**        | Deliver a polished report                                    | Big Query Dimensional model          | Gold                | Graph Snapshot | Python Flask / Django |
 
 
+
+## Pipeline Overview 
+
+![alt text](_resources/pipeline_overview_diagram.md/image.png)
+
 ## Future Improvements
 - Integrate weather and timezone data.
 - Extend to real-time streaming.
