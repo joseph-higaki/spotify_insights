@@ -18,11 +18,29 @@ architecture-beta
 ```
 
 
+```mermaid
+architecture-beta
+    service input_files(cloud)[User Manual Upload]
+
+    group bronze[Bronze]
+    group silver[Silver]
+    group gold[Gold]
+
+    
+    service extract(python)[Extract] in bronze
+    
+    service raw_json(logos:aws-s3)[Raw Json] in bronze
+
+
+    input_files:R --> L:extract
+    extract:B --> T:raw_json
+```
+
 # PLant UML
 
 Regular **Markdown** here.
 
-<div hidden>
+<!--
 ```
 @startuml firstDiagram
 
@@ -31,7 +49,7 @@ Bob -> Alice: Hi!
 		
 @enduml
 ```
-</div>
+-->
 
 ![](firstDiagram.svg)
 
