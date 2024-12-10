@@ -9,7 +9,7 @@ architecture-beta
 
     service db(database)[Database] in api
     service disk1(disk)[Storage] in api
-    service disk2(disk)[Storage] in api
+    service disk2(logos:aws-s3)[Storage] in api
     service server(server)[Server] in api
 
     db:L -- R:server
@@ -52,5 +52,7 @@ Bob -> Alice: Hi!
 -->
 
 ![](firstDiagram.svg)
+
+https://gist.github.com/neumantm/bca0e942859f73db59cd273e5e13f5a3
 
 Some more markdown.
