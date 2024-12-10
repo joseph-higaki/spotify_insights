@@ -2,57 +2,67 @@
 
 ## Pipeline Overview 
 
-```mermaid
-architecture-beta
-    
-    group api(cloud)[API]
-
-    service db(database)[Database] in api
-    service disk1(disk)[Storage] in api
-    service disk2(logos:aws-s3)[Storage] in api
-    service server(server)[Server] in api
-
-    db:L -- R:server
-    disk1:T -- B:server
-    disk2:T -- B:db
-```
-
 
 ```mermaid
 architecture-beta
-    service input_files(cloud)[User Manual Upload]
+    service input_files(logos:json-ld)[User Manual Upload]
 
-    group bronze[Bronze]
-    group silver[Silver]
-    group gold[Gold]
-
+    group pipeline(logos:airflow-icon)[Data Pipeline]  
+    group bronze[Bronze] in pipeline
+    group silver[Silver] in pipeline
+    group gold[Gold] in pipeline
+    junction junctionBronzeSilverBottom in pipeline
+    junction junctionBronzeSilverTop in pipeline
+    service orch(logos:docker-icon)[Orchestrator] in pipeline
     
-    service extract(python)[Extract] in bronze
+    service extract(logos:python)[Extract] in bronze    
+    service raw_json(logos:aws-documentdb)[GCS Raw Json] in bronze
+    service flatten(logos:python)[Flatten] in bronze
+    service raw_parquet(logos:datasette-icon)[GCS Raw parquet] in bronze
+
+    service dedup(logos:python)[Dedup Cleanse Type] in silver
+    service parquet_typed(logos:datasette-icon)[Typed parquet] in silver
+    service build_stg(logos:dbt-icon)[Build Stg] in silver
+    service stg(logos:postgresql)[Staging] in silver
+
+    junction junctionSilverGoldBottom in pipeline
+    junction junctionSilverGoldTop in pipeline
+
+    service build_mart(logos:dbt-icon)[Build Dimensional Model] in gold
+    service mart(logos:postgresql)[Data Mart] in gold
+
+    service eda(logos:jupyter)[EDA] in pipeline
+
+    junction junctionSilverGoldBottomBottom in pipeline
+    junction junctionSilverGoldBottomBottomLeft in pipeline
+    junction junctionSilverGoldBottomBottomRight in pipeline
     
-    service raw_json(logos:aws-s3)[Raw Json] in bronze
-
-
     input_files:R --> L:extract
     extract:B --> T:raw_json
+    raw_json:B --> T:flatten
+    flatten:B --> T:raw_parquet
+
+    raw_parquet:R -- L:junctionBronzeSilverBottom
+    junctionBronzeSilverBottom:T -- B:junctionBronzeSilverTop
+
+    junctionBronzeSilverTop:R --> L:dedup
+    dedup:B --> T:parquet_typed
+    parquet_typed:B --> T:build_stg
+    build_stg:B --> T:stg
+
+    stg:R -- L:junctionSilverGoldBottom
+    junctionSilverGoldBottom:T -- B:junctionSilverGoldTop
+    junctionSilverGoldTop:R --> L:build_mart
+    build_mart:B --> T:mart
+
+    eda:T -- B:junctionSilverGoldBottomBottom
+    junctionSilverGoldBottomBottom:L -- R:junctionSilverGoldBottomBottomLeft
+    junctionSilverGoldBottomBottomLeft:T -- B:stg{group}
+
+    junctionSilverGoldBottomBottom:R -- L:junctionSilverGoldBottomBottomRight
+    junctionSilverGoldBottomBottomRight:T -- B:mart{group}
 ```
 
-# PLant UML
-
-Regular **Markdown** here.
-
-<!--
-```
-@startuml firstDiagram
-
-Alice -> Bob: Hello
-Bob -> Alice: Hi!
-		
-@enduml
-```
--->
-
-![](firstDiagram.svg)
-
-https://gist.github.com/neumantm/bca0e942859f73db59cd273e5e13f5a3
-
-Some more markdown.
+Logos:
+https://icon-sets.iconify.design/logos/page-35.html?keyword=logos
+https://unpkg.com/browse/@iconify-json/logos@1.2.3/
