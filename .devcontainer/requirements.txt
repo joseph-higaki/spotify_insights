@@ -3,4 +3,5 @@ jupyter
 numpy
 matplotlib 
 seaborn
-airflow
+apache-airflow 
+python-dotenv

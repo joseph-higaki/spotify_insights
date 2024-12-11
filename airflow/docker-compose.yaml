@@ -80,16 +80,22 @@ x-airflow-common:
     GCP_PROJECT_ID: '${GCP_PROJECT_ID}'
     GCP_GCS_BUCKET: ${GCP_GCS_BUCKET}
     GCP_BQ_DATASET: ${GCP_BQ_DATASET}
+  env_file:
+    - .env
+    - airflow.env
+    #SPOTIFY_SOURCE_PATH: ${SPOTIFY_SOURCE_PATH}
+    #SPOTIFY_GCS_BUCKET: ${SPOTIFY_GCS_BUCKET}
 
   volumes:
-    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
-    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR:-.}/airflow/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/src:/opt/src
+    - ${AIRFLOW_PROJ_DIR:-.}/airflow/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/airflow/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR:-.}/airflow/plugins:/opt/airflow/plugins
     #Setting up application / airflow specific cloud credentials
-    - ${AIRFLOW_PROJ_DIR:-.}/credentials:/opt/airflow/credentials:ro
+    - ${AIRFLOW_PROJ_DIR:-.}/airflow/credentials:/opt/airflow/credentials:ro
     # requirements base and task specific
-    - ${AIRFLOW_PROJ_DIR:-.}/requirements:/opt/airflow/requirements
+    - ${AIRFLOW_PROJ_DIR:-.}/airflow/requirements:/opt/airflow/requirements
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on    
@@ -193,8 +199,8 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
-        mkdir -p /sources/logs /sources/dags /sources/plugins
-        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
+        echo mkdir -p /sources/logs /sources/dags /sources/plugins
+        echo chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
         exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:
@@ -205,8 +211,8 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "${AIRFLOW_UID}:0"
-    volumes:
-      - ${AIRFLOW_PROJ_DIR:-.}:/sources
+#    volumes:
+#      - ${AIRFLOW_PROJ_DIR:-.}:/sources
 
   airflow-cli:
     <<: *airflow-common
