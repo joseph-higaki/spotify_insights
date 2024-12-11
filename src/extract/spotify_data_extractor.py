@@ -3,20 +3,21 @@ import os
 import json
 import logging
 from datetime import datetime
-#from google.cloud import storage
+from google.cloud import storage
 
 class SpotifyFolderDataExtractor:
-    def __init__(self, source_path, bucket_name):
+    def __init__(self, source_path, bucket_name, destination_path):
         """
         Initialize Spotify Data Extraction process
         
         Args:
             source_path (str): Directory with Spotify JSON files
             bucket_name (str): Bucket for storing raw data
-            username (str): Spotify username
+            destination_path (str): path within the Bucket for storing raw data            
         """
         self.source_path = source_path
-        self.bucket_name = bucket_name        
+        self.bucket_name = bucket_name
+        self.destination_path = destination_path
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")        
 
@@ -29,6 +30,7 @@ class SpotifyFolderDataExtractor:
             extractor = SpotifyUserDataExtractor(
                 source_path=os.path.join(self.source_path, username),
                 bucket_name=self.bucket_name, 
+                destination_path = self.destination_path,
                 username=username)
             processed_files.extend(extractor.process_files())
         return processed_files
@@ -38,23 +40,38 @@ class SpotifyFolderDataExtractor:
             self.logger.info(f"Delete: {file['full_path']}")    
 
 class SpotifyUserDataExtractor:
-    def __init__(self, source_path, bucket, username):
+    def __init__(self, source_path, bucket_name, destination_path, username):
         """
         Initialize Spotify Data Extraction process
         
         Args:
             source_path (str): Directory with Spotify JSON files
             bucket_name (str): Bucket for storing raw data
+            destination_path (str): path within the Bucket for storing raw data
             username (str): Spotify username
         """
-        self.source_path = source_path
-        #self.gcs_client = storage.Client()
-        self.bucket = self.gcs_client.bucket(bucket)
+        self.source_path = source_path        
+        self.bucket_name = bucket_name
+        self.destination_path = destination_path
         self.username = username
         
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}.{username}")        
+
     
+    def upload_to_gcs(self, local_full_path:str, local_basename: str, snapshot_date: str):
+        self.logger.info(f"bucket_name: {self.bucket_name}")        
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(self.bucket_name)
+
+        destination_blob_name = f"{self.destination_path}/{self.username}/{snapshot_date}/{local_basename}"         
+        blob = bucket.blob(destination_blob_name)
+        generation_match_precondition = 0
+        blob.upload_from_filename(local_full_path, if_generation_match=generation_match_precondition)
+        self.logger.info(f"Uploaded succesfully: {self.bucket_name} - {destination_blob_name}")        
+        return 0 
+
+
     def process_files(self):
         """
         Process Spotify JSON files with idempotence and incremental loading
@@ -78,11 +95,16 @@ class SpotifyUserDataExtractor:
                 snapshot_date = processed_at.strftime('%Y-%m-%d')
                 
                 # Construct bucket destination path
-                gcs_full_path = f"{self.bucket_name}  raw/{self.username}/{snapshot_date}/{basename}"
+                #bucket_full_path = f"{self.bucket_name}{bucket_full_path}/{self.username}/{snapshot_date}/{basename}"
                 
                 try:
                     #blob = self.bucket.blob(gcs_path)
                     #blob.upload_from_filename(full_path)
+                    self.upload_to_gcs(
+                        local_full_path=full_path,
+                        local_basename=basename,
+                        snapshot_date=snapshot_date
+                    )
                     
                     processed_files.append({
                         'username': self.username,
@@ -110,10 +132,13 @@ def main():
 
     source_path= os.getenv("SPOTIFY_SOURCE_PATH")
     bucket_name= os.getenv("SPOTIFY_BUCKET")
+    destination_path = os.getenv("SPOTIFY_RAW_JSON_RELATIVE_PATH")
+    
 
     extractor = SpotifyFolderDataExtractor(
         source_path=source_path,
-        bucket_name=bucket_name        
+        bucket_name=bucket_name,
+        destination_path = destination_path     
     )
     result = extractor.process_files()
     print(json.dumps(result, indent=2))

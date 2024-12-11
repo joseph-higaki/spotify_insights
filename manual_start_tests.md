@@ -48,3 +48,5 @@ docker exec -it airflow-airflow-scheduler-1 sh
 docker exec -u root -it airflow-airflow-scheduler-1 sh
 rm -r /0_tmp_data
 
+
+
