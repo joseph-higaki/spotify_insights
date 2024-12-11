@@ -24,28 +24,28 @@ with DAG(
         print(f"delete {processed_files}")
         
 
-    def extract_spotify_raw_files(source_path, gcs_bucket):
+    def extract_spotify_raw_files(source_path, bucket_name):
         extractor = SpotifyFolderDataExtractor(
             source_path=source_path,
-            gcs_bucket=gcs_bucket
+            bucket_name=bucket_name
         )
         return extractor.process_files()
 
-    def transform_spotify_raw_json_parquet(gcs_bucket, source_path, destination_path):
+    def transform_spotify_raw_json_parquet(bucket_name, source_path, destination_path):
         transformer = SpotifyJsonToParquetTransformer(
-            gcs_bucket=gcs_bucket,
+            bucket_name=bucket_name,
             source_path=source_path,
             destination_path=destination_path        
         )
         return transformer.transform_json_to_parquet()
 
-    # Task 1: Extract JSON files to GCS
+    # Task 1: Extract JSON files to Bucket
     extract_spotify_raw_files_task = PythonOperator(
         task_id="extract_spotify_raw_files",
         python_callable=extract_spotify_raw_files,
         op_kwargs={
             "source_path": os.getenv("SPOTIFY_SOURCE_PATH"),  
-            "gcs_bucket": os.getenv("SPOTIFY_GCS_BUCKET"),
+            "bucket_name": os.getenv("SPOTIFY_BUCKET"),
         },
     )
 
@@ -63,7 +63,7 @@ with DAG(
         task_id="transform_spotify_raw_json_parquet",
         python_callable=transform_spotify_raw_json_parquet,
         op_kwargs={
-            "gcs_bucket": os.getenv("SPOTIFY_GCS_BUCKET"),
+            "bucket_name": os.getenv("SPOTIFY_BUCKET"),
             "source_path": os.getenv("SPOTIFY_RAW_JSON_RELATIVE_PATH"),
             "destination_path": os.getenv("SPOTIFY_RAW_PARQUET_RELATIVE_PATH")
         }

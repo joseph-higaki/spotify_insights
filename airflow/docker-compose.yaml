@@ -77,15 +77,12 @@ x-airflow-common:
     # not sure what it does, I will not enable it until it fails
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://?extra__google_cloud_platform__key_path=/opt/airflow/credentials/google_credentials.json'
     #
-    GCP_PROJECT_ID: '${GCP_PROJECT_ID}'
-    GCP_GCS_BUCKET: ${GCP_GCS_BUCKET}
-    GCP_BQ_DATASET: ${GCP_BQ_DATASET}
+    #GCP_PROJECT_ID: '${GCP_PROJECT_ID}'
+    #GCP_GCS_BUCKET: ${GCP_GCS_BUCKET}
+    #GCP_BQ_DATASET: ${GCP_BQ_DATASET}
   env_file:
     - .env
     - airflow.env
-    #SPOTIFY_SOURCE_PATH: ${SPOTIFY_SOURCE_PATH}
-    #SPOTIFY_GCS_BUCKET: ${SPOTIFY_GCS_BUCKET}
-
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/airflow/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/src:/opt/src

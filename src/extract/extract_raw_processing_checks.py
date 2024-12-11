@@ -119,7 +119,7 @@ def extract_raw():
     print("walk through usernames folders")
     print("for each fodler content, process json")
     print("extract metadata")
-    print("upload to gcs")
+    print("upload to bucket")
     print("store in metadata store")
 
 
