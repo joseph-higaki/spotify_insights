@@ -6,17 +6,17 @@ from datetime import datetime
 #from google.cloud import storage
 
 class SpotifyFolderDataExtractor:
-    def __init__(self, source_path, gcs_bucket):
+    def __init__(self, source_path, bucket_name):
         """
         Initialize Spotify Data Extraction process
         
         Args:
             source_path (str): Directory with Spotify JSON files
-            gcs_bucket (str): GCS Bucket for storing raw data
+            bucket_name (str): Bucket for storing raw data
             username (str): Spotify username
         """
         self.source_path = source_path
-        self.gcs_bucket = gcs_bucket        
+        self.bucket_name = bucket_name        
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")        
 
@@ -28,7 +28,7 @@ class SpotifyFolderDataExtractor:
         for username in os.listdir(self.source_path):            
             extractor = SpotifyUserDataExtractor(
                 source_path=os.path.join(self.source_path, username),
-                gcs_bucket=self.gcs_bucket, 
+                bucket_name=self.bucket_name, 
                 username=username)
             processed_files.extend(extractor.process_files())
         return processed_files
@@ -38,18 +38,18 @@ class SpotifyFolderDataExtractor:
             self.logger.info(f"Delete: {file['full_path']}")    
 
 class SpotifyUserDataExtractor:
-    def __init__(self, source_path, gcs_bucket, username):
+    def __init__(self, source_path, bucket, username):
         """
         Initialize Spotify Data Extraction process
         
         Args:
             source_path (str): Directory with Spotify JSON files
-            gcs_bucket (str): GCS Bucket for storing raw data
+            bucket_name (str): Bucket for storing raw data
             username (str): Spotify username
         """
         self.source_path = source_path
         #self.gcs_client = storage.Client()
-        #self.bucket = self.gcs_client.bucket(gcs_bucket)
+        self.bucket = self.gcs_client.bucket(bucket)
         self.username = username
         
         logging.basicConfig(level=logging.INFO)
@@ -59,8 +59,7 @@ class SpotifyUserDataExtractor:
         """
         Process Spotify JSON files with idempotence and incremental loading
         """
-        processed_files = []
-        
+        processed_files = []        
         for basename in os.listdir(self.source_path):
             if basename.endswith('.json'):
                 full_path = os.path.join(self.source_path, basename)
@@ -75,11 +74,11 @@ class SpotifyUserDataExtractor:
                 )
                 processed_at = datetime.now()
 
-                #Assume daily 
+                #group by daily 
                 snapshot_date = processed_at.strftime('%Y-%m-%d')
                 
-                # Construct GCS destination path
-                gcs_path = f"raw/{self.username}/{snapshot_date}/{basename}"
+                # Construct bucket destination path
+                gcs_full_path = f"{self.bucket_name}  raw/{self.username}/{snapshot_date}/{basename}"
                 
                 try:
                     #blob = self.bucket.blob(gcs_path)
@@ -110,11 +109,11 @@ def main():
     load_dotenv(find_dotenv()) 
 
     source_path= os.getenv("SPOTIFY_SOURCE_PATH")
-    gcs_bucket= os.getenv("SPOTIFY_GCS_BUCKET")
+    bucket_name= os.getenv("SPOTIFY_BUCKET")
 
     extractor = SpotifyFolderDataExtractor(
         source_path=source_path,
-        gcs_bucket=gcs_bucket        
+        bucket_name=bucket_name        
     )
     result = extractor.process_files()
     print(json.dumps(result, indent=2))
