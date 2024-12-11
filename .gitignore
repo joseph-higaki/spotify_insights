@@ -1,3 +1,7 @@
 *.auth
 *.auth/*
 *0_tmp_data/const_tests/*
+**__pycache__/
+.ipynb_checkpoints/
+.history
+**logs/
