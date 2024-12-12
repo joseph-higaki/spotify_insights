@@ -48,3 +48,16 @@ docker exec -it airflow-airflow-scheduler-1 sh
 docker exec -u root -it airflow-airflow-scheduler-1 sh
 rm -r /0_tmp_data
 
+
+# Bringing in the cloud
+
+GCP project `spotify-insights`
+buckets
+`spotify-insights-source-data`
+/raw/<user-name>/<snapshot-date>/*.json
+`spotify-insights-pipeline-data`
+/raw-tables/<user-name>/<snapshot-date>/*.parquet
+
+service account: spotify-insights-pipeline@spotify-insights-444509.iam.gserviceaccount.com
+
+
