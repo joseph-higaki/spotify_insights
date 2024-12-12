@@ -37,7 +37,7 @@ class SpotifyFolderDataExtractor:
 
     def delete_processed_files(self, processed_files):
         for file in processed_files:
-            self.logger.info(f"Delete: {file['full_path']}")    
+            self.logger.info(f"Delete: {file['full_path']}")
 
 class SpotifyUserDataExtractor:
     def __init__(self, source_path, destination_bucket_name, destination_path, username):
@@ -63,11 +63,9 @@ class SpotifyUserDataExtractor:
         self.logger.info(f"destination_bucket_name: {self.destination_bucket_name}")        
         storage_client = storage.Client()
         bucket = storage_client.bucket(self.destination_bucket_name)
-
         destination_blob_name = f"{self.destination_path}/{self.username}/{snapshot_date}/{local_basename}"         
-        blob = bucket.blob(destination_blob_name)
-        generation_match_precondition = 0
-        blob.upload_from_filename(local_full_path, if_generation_match=generation_match_precondition)
+        blob = bucket.blob(destination_blob_name)        
+        blob.upload_from_filename(local_full_path)
         self.logger.info(f"Uploaded succesfully: {self.destination_bucket_name} - {destination_blob_name}")        
         return 0 
 
@@ -89,11 +87,9 @@ class SpotifyUserDataExtractor:
                 )
                 processed_at = datetime.now()
                 #group by daily 
-                snapshot_date = processed_at.strftime('%Y-%m-%d')
+                snapshot_date = created_at.strftime('%Y-%m-%d')
                 
-                try:
-                    #blob = self.bucket.blob(gcs_path)
-                    #blob.upload_from_filename(full_path)
+                try:                    
                     self.upload_to_gcs(
                         local_full_path=full_path,
                         local_basename=basename,
@@ -112,8 +108,8 @@ class SpotifyUserDataExtractor:
                     self.logger.info(f"Processed: {full_path}")                    
                     #update metadata
                     #delete from source
-                except Exception as e:
-                    self.logger.error(f"Error processing {full_path}: {e}")            
+                except Exception as e:                    
+                    self.logger.error(f"Error processing {full_path}: {e}")                                
         return processed_files
 
 def main():
