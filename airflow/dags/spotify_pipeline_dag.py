@@ -13,7 +13,7 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    dag_id="spotify_pipeline_dag_0",
+    dag_id="spotify_pipeline_dag",
     default_args=default_args,
     description="Spotify ingestion and transformation pipeline",
     schedule_interval=None,  # Manually triggered
@@ -40,6 +40,15 @@ with DAG(
             destination_path=destination_path        
         )
         return transformer.transform_json_to_parquet()
+    
+    def transform_datatypes_dedup(source_bucket_name, source_path, destination_bucket_name, destination_path):
+        transformer = SpotifyTypeDedupTransformer(
+            source_bucket_name=source_bucket_name,
+            source_path=source_path,
+            destination_bucket_name=destination_bucket_name,
+            destination_path=destination_path        
+        )
+        return transformer.transform()
 
     # Task 1: Extract JSON files to Bucket
     extract_spotify_raw_files_task = PythonOperator(
@@ -72,10 +81,27 @@ with DAG(
             "destination_path": os.getenv("SPOTIFY_RAW_PARQUET_RELATIVE_PATH")            
         }
     )
+
+    # Task 3: Transform DTypes and Dedup
+    transform_datatypes_dedup_task = PythonOperator(
+        task_id="transform_datatypes_dedup",
+        python_callable=transform_datatypes_dedup,
+        op_kwargs={
+            "source_bucket_name": os.getenv("SPOTIFY_PIPELINE_BUCKET"),
+            "source_path": os.getenv("SPOTIFY_RAW_PARQUET_RELATIVE_PATH"),
+            "destination_bucket_name": os.getenv("SPOTIFY_PIPELINE_BUCKET"),
+            "destination_path": os.getenv("SPOTIFY_STG_DTYPE_DEDUP_PARQUET_RELATIVE_PATH")
+        }
+    )
   
     # Set task dependencies
     extract_spotify_raw_files_task >> delete_spotify_raw_processed_files_task
     extract_spotify_raw_files_task >> transform_spotify_raw_json_parquet_task
+    transform_spotify_raw_json_parquet_task >> transform_datatypes_dedup_task
+
+
+
+    
 
 # ********************************************************************************************
 # TO-DO: proper package management https://github.com/joseph-higaki/spotify_insights/issues/26
@@ -95,5 +121,6 @@ for script_path_var_name in SCRIPT_PATHS_ENV_VAR_NAMES:
 # Import the functions to be executed
 from spotify_data_extractor import SpotifyFolderDataExtractor
 from transform_json_raw_parquet import SpotifyJsonToParquetTransformer
+from transform_dtype_dedup import SpotifyTypeDedupTransformer
 # ********************************************************************************************
 # ********************************************************************************************

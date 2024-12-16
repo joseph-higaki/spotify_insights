@@ -57,14 +57,14 @@ class SpotifyJsonToParquetTransformer:
         for username, date, filename, json_content in self.iterate_files_from_gcs():
             if json_content:
                 df = pd.read_json(BytesIO(json_content), dtype=str) # Force everything as str, do data type discovery later
-                df['user_name'] = username
+                df['username'] = username
                 df['snapshot_date'] = date
                 table = pa.Table.from_pandas(df)
                 destination_full_path = self.get_destination_full_path()                
                 pq.write_to_dataset(
                     table,
                     root_path=destination_full_path,
-                    partition_cols=['user_name', 'snapshot_date']
+                    partition_cols=['username', 'snapshot_date']
                 )   
 
                     
