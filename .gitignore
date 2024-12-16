@@ -1,7 +1,7 @@
 *.auth
 *.auth/*
 *0_tmp_data/const_tests/*
-*0_tmp_data/new/joseph-higaki/*
+*0_tmp_data/new/*
 **__pycache__/
 .ipynb_checkpoints/
 .history
