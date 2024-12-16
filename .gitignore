@@ -1,7 +1,7 @@
 *.auth
 *.auth/*
-*0_tmp_data/const_tests/*
-*0_tmp_data/new/*
+*0_tmp_data/streams/const_tests/*
+*0_tmp_data/streams/new/*
 **__pycache__/
 .ipynb_checkpoints/
 .history
