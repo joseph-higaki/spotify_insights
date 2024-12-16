@@ -114,7 +114,12 @@ class SpotifyTypeDedupTransformer:
             
         dedup_by_hash['streamed_year'] = dedup_by_hash['ts'].dt.year
         dedup_by_hash.rename(columns={'ts': 'streamed_at'}, inplace=True)
-        return dedup_by_hash
+
+        new_columns = ['stream_id', 'streamed_year' ]
+        remove_columns=["rn_by_stream_id", "count_by_stream_id", "snapshot_date"]
+        old_columns =  [col for col in dedup_by_hash.columns if col not in (new_columns + remove_columns)]
+        return dedup_by_hash[new_columns + old_columns]
+        
         print(dedup_by_hash.head(1))
         print(df.head(1))
 
