@@ -6,3 +6,5 @@ seaborn
 apache-airflow 
 python-dotenv
 apache-airflow-providers-google
+pyarrow 
+gcsfs

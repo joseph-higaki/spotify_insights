@@ -13,7 +13,7 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    dag_id="spotify_pipeline_dag",
+    dag_id="spotify_pipeline_dag_0",
     default_args=default_args,
     description="Spotify ingestion and transformation pipeline",
     schedule_interval=None,  # Manually triggered
@@ -32,10 +32,11 @@ with DAG(
         )
         return extractor.process_files()
 
-    def transform_spotify_raw_json_parquet(source_bucket_name, source_path, destination_path):
+    def transform_spotify_raw_json_parquet(source_bucket_name, source_path, destination_bucket_name, destination_path):
         transformer = SpotifyJsonToParquetTransformer(
             source_bucket_name=source_bucket_name,
             source_path=source_path,
+            destination_bucket_name=destination_bucket_name,
             destination_path=destination_path        
         )
         return transformer.transform_json_to_parquet()
@@ -67,6 +68,7 @@ with DAG(
         op_kwargs={
             "source_bucket_name": os.getenv("SPOTIFY_SOURCE_BUCKET"),
             "source_path": os.getenv("SPOTIFY_RAW_JSON_RELATIVE_PATH"),
+            "destination_bucket_name": os.getenv("SPOTIFY_PIPELINE_BUCKET"),
             "destination_path": os.getenv("SPOTIFY_RAW_PARQUET_RELATIVE_PATH")            
         }
     )
