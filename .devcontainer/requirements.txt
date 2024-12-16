@@ -6,9 +6,6 @@ seaborn
 apache-airflow 
 python-dotenv
 apache-airflow-providers-google
-<<<<<<< Updated upstream
 pyarrow 
 gcsfs
-=======
 duckdb 
->>>>>>> Stashed changes
