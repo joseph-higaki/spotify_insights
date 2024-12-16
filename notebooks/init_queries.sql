@@ -24,7 +24,7 @@ skipped
 offline
 offline_timestamp
 incognito_mode
-user_name
+username
 snapshot_date
 platform
 conn_country
