@@ -45,7 +45,7 @@ class SpotifyJsonToParquetTransformer:
     def iterate_files_from_gcs(self):
         storage_client = storage.Client()
         bucket = storage_client.bucket(self.source_bucket_name)
-        for blob_item in bucket.list_blobs():                
+        for blob_item in bucket.list_blobs(prefix=self.source_path):                
             username, date, filename = self.get_blobname_components(blob_item.name)
             yield (username, date, filename, blob_item.download_as_string())
         
