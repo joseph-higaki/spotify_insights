@@ -72,7 +72,8 @@
 				"ms-toolsai.jupyter",
 				"bierner.markdown-preview-github-styles",
 				"mechatroner.rainbow-csv",
-				"bierner.markdown-mermaid"				
+				"bierner.markdown-mermaid",
+				"GitHub.copilot"
 			]
 		}	
 	}
