@@ -3,3 +3,6 @@ pandas
 pyarrow 
 gcsfs
 duckdb
+requests-cache 
+retry-requests 
+numpy 
