@@ -9,3 +9,6 @@ apache-airflow-providers-google
 pyarrow 
 gcsfs
 duckdb 
+requests-cache 
+retry-requests 
+numpy 
