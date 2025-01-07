@@ -44,6 +44,9 @@ docker compose -f /workspaces/spotify_insights/airflow/docker-compose.yaml up
 docker cp  /workspaces/spotify_insights/0_tmp_data/. airflow-airflow-scheduler-1:/opt/0_tmp_data/
 docker compose -f /workspaces/spotify_insights/airflow/docker-compose.yaml down 
 
+docker cp  /workspaces/spotify_insights/0_tmp_data/. airflow-airflow-scheduler-1:/opt/0_tmp_data/
+
+
 docker exec -it airflow-airflow-scheduler-1 sh
 docker exec -u root -it airflow-airflow-scheduler-1 sh
 rm -r /0_tmp_data
